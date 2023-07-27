@@ -25,8 +25,13 @@
   New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" `
   -Name "LongPathsEnabled" -Value 1 -PropertyType DWORD -Force
   ```
+## MassTransit
+
 * [Quick Start: Azure Service Bus](https://masstransit.io/quick-starts/azure-service-bus)
   * `dotnet add package MassTransit.Azure.ServiceBus.Core`
+* [Sagas](https://masstransit.io/documentation/patterns/saga) (Orchestration & Coordination)
+* [Routing Slip](https://masstransit.io/documentation/patterns/routing-slip) (Choreography)
+  * [EIP: Routing Slip Pattern](https://www.enterpriseintegrationpatterns.com/patterns/messaging/RoutingTable.html)
 
 
 # Provisioning Azure Resources
