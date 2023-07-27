@@ -7,11 +7,11 @@ using Contracts;
 using MassTransit;
 using Microsoft.Extensions.Hosting;
 
-public class Worker : BackgroundService
+public class TimeWorker : BackgroundService
 {
     readonly IBus _bus;
 
-    public Worker(IBus bus)
+    public TimeWorker(IBus bus)
     {
         _bus = bus;
     }
@@ -22,7 +22,7 @@ public class Worker : BackgroundService
         {
             await _bus.Publish(new GettingStarted { Value = $"The time is {DateTimeOffset.Now}" }, stoppingToken);
 
-            await Task.Delay(1000, stoppingToken);
+            await Task.Delay(5000, stoppingToken);
         }
     }
 }

@@ -1,11 +1,12 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
+using StateMachines;
+using Game;
+using GettingStarted.Services;
 
 namespace GettingStarted
 {
@@ -27,12 +28,11 @@ namespace GettingStarted
                         // By default, sagas are in-memory, but should be changed to a durable
                         // saga repository.
                         x.SetInMemorySagaRepositoryProvider();
-                        
+
                         var entryAssembly = Assembly.GetEntryAssembly();
 
                         x.AddConsumers(entryAssembly);
                         x.AddSagaStateMachines(entryAssembly);
-                        x.AddSagas(entryAssembly);
                         x.AddActivities(entryAssembly);
 
                         var azureConnStr = Environment.GetEnvironmentVariable("mtpoccs");
@@ -51,7 +51,10 @@ namespace GettingStarted
                         }
                     });
 
-                    services.AddHostedService<Worker>();
+                    services.AddHostedService<TimeWorker>();
+                    services.AddHostedService<GameSagaWorker>();
+                    services.AddSingleton<Random>();
+                    services.AddTransient<IAnswerService, EmbeddedAnswerService>();
                 });
     }
 }

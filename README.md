@@ -57,6 +57,10 @@
   * Listen for a guess request.
   * Given the incomplete word and known guesses attempted, randomly guess another letter.
   * Guess is returned along with the sequence of the request.
+* ChatGPT Prompt:
+   ```chatgpt
+   Create a MassTransit State Machine Saga named GameSaga that is initiated from an event named "StartGateEvent", listens for "GuessEvent", and publishes a "WrongGuessEvent" or "CorrectGuessEvent" in response.
+   ```
 
 
 # Provisioning Azure Resources
