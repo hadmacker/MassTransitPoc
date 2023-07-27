@@ -1,5 +1,22 @@
 # MassTransitPoc
 
+## Table of Contents
+
+* [Prerequisites](#prerequisites)
+* [Technical Reference](#technical-reference)
+* [Provisioning Azure Resources](#provisioning-azure-resources)
+
+
+# Prerequisites
+
+## Tools
+
+* [PowerShell 7](https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows?view=powershell-7.2)
+* [Azure CLI](https://docs.microsoft.com/en-us/azure/azure-resource-manager/bicep/install#azure-cli)
+* If using Azure, set the connection string in environment variable "mtpoccs" and restart (maybe just log out and back in?)
+
+# Technical Reference
+
 * [MassTransit: Getting Started](https://masstransit.io/quick-starts/in-memory)
   * `dotnet new --install MassTransit.Templates`
 * [Fix for "Please use language version 1.0 or greater"](https://chanmingman.wordpress.com/2021/10/20/feature-global-using-directive-is-not-available-in-c-9-0-please-use-language-version-10-0-or-greater/)
@@ -8,13 +25,9 @@
   New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" `
   -Name "LongPathsEnabled" -Value 1 -PropertyType DWORD -Force
   ```
+* [Quick Start: Azure Service Bus](https://masstransit.io/quick-starts/azure-service-bus)
+  * `dotnet add package MassTransit.Azure.ServiceBus.Core`
 
-# Prerequisites
-
-## Tools
-
-1. [PowerShell 7](https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows?view=powershell-7.2)
-2. [Azure CLI](https://docs.microsoft.com/en-us/azure/azure-resource-manager/bicep/install#azure-cli)
 
 # Provisioning Azure Resources
 

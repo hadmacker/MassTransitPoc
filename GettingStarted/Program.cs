@@ -27,7 +27,7 @@ namespace GettingStarted
                         // By default, sagas are in-memory, but should be changed to a durable
                         // saga repository.
                         x.SetInMemorySagaRepositoryProvider();
-
+                        
                         var entryAssembly = Assembly.GetEntryAssembly();
 
                         x.AddConsumers(entryAssembly);
@@ -35,10 +35,20 @@ namespace GettingStarted
                         x.AddSagas(entryAssembly);
                         x.AddActivities(entryAssembly);
 
-                        x.UsingInMemory((context, cfg) =>
-                        {
-                            cfg.ConfigureEndpoints(context);
-                        });
+                        var azureConnStr = Environment.GetEnvironmentVariable("mtpoccs");
+                        if(string.IsNullOrWhiteSpace(azureConnStr)) {
+                            x.UsingInMemory((context, cfg) =>
+                            {
+                                cfg.ConfigureEndpoints(context);
+                            });     
+                        } else {
+                            x.UsingAzureServiceBus((context,cfg) =>
+                            {
+                                cfg.Host(azureConnStr);
+
+                                cfg.ConfigureEndpoints(context);
+                            });
+                        }
                     });
 
                     services.AddHostedService<Worker>();
