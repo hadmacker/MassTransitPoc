@@ -15,8 +15,6 @@
         IConsumer<CorrectGuessEvent>
 
     {
-        readonly ILogger<GamePlayerConsumer> _logger;
-
         private static int NextGuessPosition = 0;
         private static List<string> Letters = new List<string>
         {
