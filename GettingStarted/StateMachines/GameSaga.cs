@@ -9,9 +9,13 @@ public class GameSaga : MassTransitStateMachine<GameSagaState>
 {
     public Event<StartGameEvent> StartGame { get; private set; }
     public Event<GuessEvent> Guess { get; private set; }
+    public Event<GameOverEvent> Finalized { get; private set; }
 
-    public State Correct { get; private set; }
+    public State Final { get; private set; }
     public State Wrong { get; private set; }
+
+    // Allow most puzzles to succeed, but with a few likely failures.
+    const int maxWrongAttempts = 24;
 
     public GameSaga(IAnswerService answerService)
     {
@@ -22,58 +26,99 @@ public class GameSaga : MassTransitStateMachine<GameSagaState>
 
         Initially(
             When(StartGame)
-                .Then(context => {
+                .Then(context =>
+                {
                     Console.WriteLine("GameSaga initiated from StartGameEvent");
-                    context.Saga.Answer = answerService.GetAnswer();
-                    })
+                    context.Saga.ApplyGameStart(answerService.GetAnswer());
+                    context.Publish(
+                        new GameStartedEvent
+                        {
+                            CorrelationId = context.Message.CorrelationId,
+                            MaskedAnswer = context.Saga.MaskedAnswer
+                        });
+                })
                 .TransitionTo(Wrong)
         );
 
         During(Wrong,
             When(Guess)
-                .Then(context => {
-                    if (IsGuessCorrect(context))
+                .Then(context =>
+                {
+                    if (context.Message.GuessValue.Length != 1)
                     {
-                        context.Saga.WrongAttempts = 0;
-                        context.TransitionToState(Correct);
+                        Console.WriteLine("Wrong, try again!");
+                        context.TransitionToState(Wrong);
+                        context.Publish(
+                            new GameRuleEvent
+                            {
+                                CorrelationId = context.Message.CorrelationId,
+                                Message = "GuessValue must be a single character"
+                            });
+                    }
+
+                    var isCorrect = context.Saga.ApplyGuess(context.Message.GuessValue);
+                    if (isCorrect)
+                    {
                         Console.WriteLine("Correct!");
-                        context.Publish(new CorrectGuessEvent { CorrelationId = context.Message.CorrelationId });
+
+                        if (context.Saga.MaskedAnswer == context.Saga.Answer)
+                        {
+                            context.TransitionToState(Final);
+                            context.Publish(
+                                new GameOverEvent
+                                {
+                                    CorrelationId = context.Message.CorrelationId,
+                                    WrongAttempts = context.Saga.WrongAttempts,
+                                    MaskedAnswer = context.Saga.MaskedAnswer,
+                                    AllGuesses = context.Saga.AllGuesses,
+                                });
+                        }
+                        else
+                        {
+                            context.Publish(
+                                new CorrectGuessEvent
+                                {
+                                    CorrelationId = context.Message.CorrelationId,
+                                    MaskedAnswer = context.Saga.MaskedAnswer,
+                                    AllGuesses = context.Saga.AllGuesses,
+                                    WrongAttempts = context.Saga.WrongAttempts
+                                });
+                        }
                     }
                     else
                     {
-                        context.Saga.WrongAttempts++;
-                        if (context.Saga.WrongAttempts >= 6)
+                        if (context.Saga.WrongAttempts > maxWrongAttempts)
                         {
                             Console.WriteLine("Wrong, too many attempts!");
                             context.TransitionToState(Final);
-                            context.Publish(new WrongGuessEvent { CorrelationId = context.Message.CorrelationId, WrongAttempts = context.Saga.WrongAttempts });
+                            context.Publish(
+                                new GameOverEvent
+                                {
+                                    CorrelationId = context.Message.CorrelationId,
+                                    WrongAttempts = context.Saga.WrongAttempts,
+                                    MaskedAnswer = context.Saga.MaskedAnswer,
+                                    AllGuesses = context.Saga.AllGuesses,
+                                });
                         }
                         else
                         {
                             Console.WriteLine("Wrong, try again!");
                             context.TransitionToState(Wrong);
-                            context.Publish(new WrongGuessEvent { CorrelationId = context.Message.CorrelationId, WrongAttempts = context.Saga.WrongAttempts });
+                            context.Publish(
+                                new WrongGuessEvent
+                                {
+                                    CorrelationId = context.Message.CorrelationId,
+                                    WrongAttempts = context.Saga.WrongAttempts,
+                                    MaskedAnswer = context.Saga.MaskedAnswer,
+                                    AllGuesses = context.Saga.AllGuesses,
+                                });
                         }
                     }
                 })
         );
 
-        During(Correct,
-            When(Guess)
-                .Then(context => Console.WriteLine("Correct, then guess?"))
-                .Publish(context => new CorrectGuessEvent { CorrelationId = context.Message.CorrelationId })
-        );
-    }
+        During(Final, When(Finalized).Finalize());
 
-    private void HandleGuess(BehaviorContext<GameSagaState, GuessEvent> context)
-    {
-        // Perform any processing or validation related to the guess event.
-    }
-
-    private bool IsGuessCorrect(BehaviorContext<GameSagaState, GuessEvent> context)
-    {
-        // Determine if the guess is correct based on the game logic.
-        // For demonstration purposes, assume it's correct if the guess is greater than 5.
-        return context.Message.GuessValue > 4;
+        SetCompletedWhenFinalized();
     }
 }

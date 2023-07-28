@@ -1,4 +1,12 @@
-# MassTransitPoc
+# MassTransitPoc: Hangman variant
+
+* Creates a State Machine Saga that is an instance of a Hangman game.
+  * On Start: Generate a word randomly from a known list of answers (see answers.txt)
+  * Guesses reveal a masked answer until all letters are guessed.
+  * Max Guesses is 24. This allows for most puzzles to solve but a few to fail.
+* Uses a single Player, which is a Consumer. Consumer has automated logic to guess and respond to saga state changes.
+* Includes a Background Worker to start games: Press **"S"** to start a new game.
+
 
 ## Table of Contents
 
@@ -13,12 +21,13 @@
 
 * [PowerShell 7](https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows?view=powershell-7.2)
 * [Azure CLI](https://docs.microsoft.com/en-us/azure/azure-resource-manager/bicep/install#azure-cli)
-* If using Azure Service Bus, set the connection string in environment variable `mtpoccs` and restart (maybe just log out and back in?)
+* [Install Bicep Tools](https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/install)
 * [Enable Windows Long Paths](https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation?tabs=registry)
   ```PowerShell
   New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" `
   -Name "LongPathsEnabled" -Value 1 -PropertyType DWORD -Force
   ```
+* If using Azure Service Bus, set the connection string in environment variable `mtpoccs` and restart (maybe just log out and back in?)
 
 
 # Attributions
@@ -43,24 +52,6 @@
 * [Sagas](https://masstransit.io/documentation/patterns/saga) (Orchestration & Coordination)
 * [Routing Slip](https://masstransit.io/documentation/patterns/routing-slip) (Choreography)
   * [EIP: Routing Slip Pattern](https://www.enterpriseintegrationpatterns.com/patterns/messaging/RoutingTable.html)
-
-
-# Saga Concept
-
-* An abridged version of "Wheel of Fortune", with 2 players.
-* The Saga is an instance of the game.
-  * On Start: Generate a word randomly from a known list of answers (see answers.txt)
-  * While contributed guesses do not result in the complete answer, notify the next player of the current state of the phrase and await their guess.
-    * Player will listen for a guess prompt and will send an attempt.
-    * If guess is accepted as the winner, both are notified that the game is over, and the winner.
-* Players:
-  * Listen for a guess request.
-  * Given the incomplete word and known guesses attempted, randomly guess another letter.
-  * Guess is returned along with the sequence of the request.
-* ChatGPT Prompt:
-   ```chatgpt
-   Create a MassTransit State Machine Saga named GameSaga that is initiated from an event named "StartGateEvent", listens for "GuessEvent", and publishes a "WrongGuessEvent" or "CorrectGuessEvent" in response.
-   ```
 
 
 # Provisioning Azure Resources

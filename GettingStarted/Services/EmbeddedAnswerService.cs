@@ -21,16 +21,16 @@ namespace GettingStarted.Services
             return answers[index];
         }
 
-        private string ReadEmbeddedResource(string resourceName, Assembly assembly)
+        private string ReadEmbeddedResource(string partialResourceName, Assembly assembly)
         {
-            var resources = assembly.GetManifestResourceNames().Where(r => r.Contains(resourceName));
+            var resources = assembly.GetManifestResourceNames().Where(r => r.Contains(partialResourceName));
             if(!resources.Any())
             {
-                throw new InvalidOperationException($"No resource matching partial name of '{resourceName}' was found in assembly {assembly.FullName}. Is the resource marked as 'Build Action: Embedded Resource' in the Visual Studio project?");
+                throw new InvalidOperationException($"No resource matching partial name of '{partialResourceName}' was found in assembly {assembly.FullName}. Is the resource marked as 'Build Action: Embedded Resource' in the Visual Studio project?");
             }
             if(resources.Count() != 1)
             {
-                throw new InvalidOperationException($"Multiple resources matching partial name of '{resourceName}' were found in assembly {assembly.FullName}");
+                throw new InvalidOperationException($"Multiple resources matching partial name of '{partialResourceName}' were found in assembly {assembly.FullName}");
             }
             using (Stream stream = assembly.GetManifestResourceStream(resources.First()))
             {

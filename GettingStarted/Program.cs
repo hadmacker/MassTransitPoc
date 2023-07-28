@@ -51,8 +51,7 @@ namespace GettingStarted
                         }
                     });
 
-                    services.AddHostedService<TimeWorker>();
-                    services.AddHostedService<GameSagaWorker>();
+                    services.AddHostedService<StartGameSagaWorker>();
                     services.AddSingleton<Random>();
                     services.AddTransient<IAnswerService, EmbeddedAnswerService>();
                 });
