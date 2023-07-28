@@ -4,8 +4,6 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
-using StateMachines;
-using Game;
 using GettingStarted.Services;
 
 namespace GettingStarted

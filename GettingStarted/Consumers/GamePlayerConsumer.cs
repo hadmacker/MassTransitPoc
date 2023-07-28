@@ -1,4 +1,4 @@
-﻿namespace Company.Consumers
+﻿namespace GettingStarted.Consumers
 {
     using System.Threading.Tasks;
     using MassTransit;
@@ -21,6 +21,8 @@
             "R","error","S","T","L","N","E","A","B","C","D","F","G","H","I","J","K","M","O","P","Q","U","V","W","X","Y","Z"
         };
 
+        private ILogger<GamePlayerConsumer> _logger;
+
         private static string NextGuess()
         {
             var nextGuess = Letters[NextGuessPosition];
@@ -38,10 +40,10 @@
         public async Task Consume(ConsumeContext<WrongGuessEvent> context)
         {
             var allGuesses = string.Join(',', context.Message.AllGuesses);
-            Console.WriteLine($"Wrong Guess:        {context.Message.MaskedAnswer} ({context.Message.WrongAttempts}) {allGuesses}");
+            _logger.LogInformation($"Wrong Guess:        {context.Message.MaskedAnswer} ({context.Message.WrongAttempts}) {allGuesses}");
 
             var nextGuess = NextGuess();
-            Console.WriteLine($"Next Guess: {nextGuess}");
+            _logger.LogInformation($"Next Guess: {nextGuess}");
             await context.Publish<GuessEvent>(new
             {
                 CorrelationId = context.Message.CorrelationId,
@@ -51,10 +53,10 @@
 
         public async Task Consume(ConsumeContext<GameStartedEvent> context)
         {
-            Console.WriteLine($"GAME STARTED! Word: {context.Message.MaskedAnswer} ({context.Message.MaskedAnswer.Length} characters)");
+            _logger.LogInformation($"GAME STARTED! Word: {context.Message.MaskedAnswer} ({context.Message.MaskedAnswer.Length} characters)");
 
             var nextGuess = NextGuess();
-            Console.WriteLine($"Next Guess: {nextGuess}");
+            _logger.LogInformation($"Next Guess: {nextGuess}");
             await context.Publish<GuessEvent>(new
             {
                 CorrelationId = context.Message.CorrelationId,
@@ -64,15 +66,15 @@
 
         public async Task Consume(ConsumeContext<GameOverEvent> context)
         {
-            Console.WriteLine($"GAME OVER! Word:    {context.Message.MaskedAnswer} ({context.Message.MaskedAnswer.Length} characters) after {context.Message.AllGuesses.Count} guesses");
+            _logger.LogInformation($"GAME OVER! Word:    {context.Message.MaskedAnswer} ({context.Message.MaskedAnswer.Length} characters) after {context.Message.AllGuesses.Count} guesses");
         }
 
         public async Task Consume(ConsumeContext<GameRuleEvent> context)
         {
-            Console.WriteLine($"GAME RULE ERROR! {context.Message.Message}");
+            _logger.LogInformation($"GAME RULE ERROR! {context.Message.Message}");
 
             var nextGuess = NextGuess();
-            Console.WriteLine($"Next Guess: {nextGuess}");
+            _logger.LogInformation($"Next Guess: {nextGuess}");
             await context.Publish<GuessEvent>(new
             {
                 CorrelationId = context.Message.CorrelationId,
@@ -82,10 +84,10 @@
 
         public async Task Consume(ConsumeContext<CorrectGuessEvent> context)
         {
-            Console.WriteLine($"Correct! Word:      {context.Message.MaskedAnswer} ({context.Message.MaskedAnswer.Length} characters)");
+            _logger.LogInformation($"Correct! Word:      {context.Message.MaskedAnswer} ({context.Message.MaskedAnswer.Length} characters)");
 
             var nextGuess = NextGuess();
-            Console.WriteLine($"Next Guess: {nextGuess}");
+            _logger.LogInformation($"Next Guess: {nextGuess}");
             await context.Publish<GuessEvent>(new
             {
                 CorrelationId = context.Message.CorrelationId,

@@ -1,4 +1,4 @@
-﻿namespace Contracts
+﻿namespace GettingStarted.Contracts
 {
     using System;
     using System.Collections.Generic;

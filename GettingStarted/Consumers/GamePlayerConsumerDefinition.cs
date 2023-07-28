@@ -1,4 +1,4 @@
-namespace Company.Consumers
+namespace GettingStarted.Consumers
 {
     using MassTransit;
 
